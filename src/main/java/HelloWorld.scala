@@ -1,5 +1,3 @@
-package org.hackx.streaming
-
 object HelloWorld {
 
     def main(args: Array[String]) {
