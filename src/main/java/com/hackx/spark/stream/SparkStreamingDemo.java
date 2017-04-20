@@ -1,4 +1,4 @@
-package org.hackx.streaming;
+package com.hackx.spark.stream;
 
 import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
@@ -24,16 +24,16 @@ public class SparkStreamingDemo {
         javaStreamingContext.checkpoint("/Users/caolei/WorkSpace/hack-child/src/main/resources/checkpoint");
 
 
-        List<Tuple2<String, Integer>> tuples = Arrays.asList(new Tuple2<>("hello", 1), new Tuple2<>("world", 1));
+        List<Tuple2<String, Integer>> tuples = Arrays.asList(new Tuple2<String, Integer>("hello", 1), new Tuple2<String, Integer>("world", 1));
         JavaPairRDD<String, Integer> initialRDD = javaStreamingContext.sparkContext().parallelizePairs(tuples);
 
         JavaReceiverInputDStream<String> lines = javaStreamingContext.socketTextStream("localhost", 9999);
         JavaDStream<String> words = lines.flatMap(line -> Arrays.asList(SPACE.split(line)).iterator());
-        JavaPairDStream<String, Integer> wordPairs = words.mapToPair(word -> new Tuple2<>(word, 1));
+        JavaPairDStream<String, Integer> wordPairs = words.mapToPair(word -> new Tuple2<String, Integer>(word, 1));
 
         Function2<Integer, Integer, Integer> reduceFunc = (Integer x1, Integer x2) -> x1 + x2;
 
-        // Reduce last 30 seconds of data, every 10 seconds
+        /*Reduce last 30 seconds of data, every 10 seconds*/
         JavaPairDStream<String, Integer> windowedWordCounts = wordPairs.reduceByKeyAndWindow(reduceFunc, Durations.seconds(8), Durations.seconds(4));
         windowedWordCounts.print();
 
